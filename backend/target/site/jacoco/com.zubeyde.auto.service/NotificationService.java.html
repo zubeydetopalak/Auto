@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>NotificationService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auto</a> &gt; <a href="index.source.html" class="el_package">com.zubeyde.auto.service</a> &gt; <span class="el_source">NotificationService.java</span></div><h1>NotificationService.java</h1><pre class="source lang-java linenums">package com.zubeyde.auto.service;
+
+import com.zubeyde.auto.entity.Inspection;
+import com.zubeyde.auto.entity.InspectionDetail;
+import com.zubeyde.auto.repository.PaymentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+
+@Service
+<span class="fc" id="L15">public class NotificationService {</span>
+    @Autowired
+    private PaymentRepository repository;
+    public String AppointmentNotification(){
+<span class="fc" id="L19">        return &quot;Randevunuz başarı ile oluşturuldu&quot;;</span>
+    }
+    public String IncspectionCompletedNotification(Inspection inspection){
+<span class="fc" id="L22">        List&lt;InspectionDetail&gt; liste=new ArrayList&lt;&gt;();</span>
+<span class="fc bfc" id="L23" title="All 2 branches covered.">        if (inspection.getResult().equals(&quot;KALDI&quot;)){</span>
+<span class="fc bfc" id="L24" title="All 2 branches covered.">            for (InspectionDetail inspectionDetail : inspection.getDetails()) {</span>
+<span class="fc bfc" id="L25" title="All 2 branches covered.">                if(!inspectionDetail.isPassed()){</span>
+<span class="fc" id="L26">                    liste.add(inspectionDetail);</span>
+                }
+<span class="fc" id="L28">            }</span>
+<span class="fc" id="L29">            String message= &quot;İnceleme sonucunuz negatif , Lütfen belirtilen ağır hasarları gideriniz. &quot;+liste.toString();</span>
+<span class="fc" id="L30">            return message;</span>
+
+        }
+<span class="fc" id="L33">        return &quot;İnclemeniz başarı ile tamamlandı : Aracınız GEÇTİ&quot;;</span>
+    }
+    public String PaymentCompletedNotification(Inspection inspection){
+<span class="fc bfc" id="L36" title="All 2 branches covered.">        if(repository.findByInspectionId(inspection.getId()).getPaymentMethod()!=null){</span>
+<span class="fc" id="L37">            return &quot;Ödemeniz başarı ile alındı. &quot;;</span>
+        }
+<span class="fc" id="L39">        return &quot;Henüz ödeme yapmadınız. &quot;;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

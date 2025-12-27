@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppointmentService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auto</a> &gt; <a href="index.source.html" class="el_package">com.zubeyde.auto.service</a> &gt; <span class="el_source">AppointmentService.java</span></div><h1>AppointmentService.java</h1><pre class="source lang-java linenums">package com.zubeyde.auto.service;
+import com.zubeyde.auto.entity.*;
+import com.zubeyde.auto.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+<span class="fc" id="L11">public class AppointmentService {</span>
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
+
+    @Autowired
+    private StationRepository stationRepository;
+
+    @Autowired
+    private VehicleRepository vehicleRepository;
+
+    /**
+     * Otomatik İstasyon Atama Mantığı (AVM Mantığı)
+     * Markaya özel peron varsa oraya, yoksa genel perona atar.
+     */
+    public Appointment createAppointment(String plateCode) {
+<span class="fc" id="L27">        Vehicle vehicle = vehicleRepository.findByPlateCode(plateCode)</span>
+<span class="fc" id="L28">                .orElseThrow(() -&gt; new RuntimeException(&quot;Araç bulunamadı!&quot;));</span>
+
+        // -- MANTIK: Uygun İstasyonu Bul --
+<span class="fc" id="L31">        Station targetStation = findBestStationForVehicle(vehicle);</span>
+
+<span class="fc" id="L33">        Appointment appointment = new Appointment();</span>
+<span class="fc" id="L34">        appointment.setStatus(AppointmentStatus.PENDING);</span>
+<span class="fc" id="L35">        appointment.setStation(targetStation);</span>
+<span class="fc" id="L36">        appointment.setVehicle(vehicle);</span>
+<span class="fc" id="L37">        return appointmentRepository.save(appointment);</span>
+    }
+
+    private Station findBestStationForVehicle(Vehicle vehicle) {
+        // 1. Önce bu markaya özel bir istasyon var mı diye bak (Örn: Sadece BMW bakan yer)
+        // Not: Burada basitlik adına tüm istasyonları çekip filtreliyoruz.
+<span class="fc" id="L43">        List&lt;Station&gt; allStations = stationRepository.findAll();</span>
+        
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        for (Station station : allStations) {</span>
+            // Eğer istasyonun özel bir markası varsa ve aracın markasıyla eşleşiyorsa
+<span class="fc bfc" id="L47" title="All 2 branches covered.">            if (station.getExclusiveBrand() != null &amp;&amp; </span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">                station.getExclusiveBrand().getName().equals(vehicle.getBrand().getName())) {</span>
+<span class="fc" id="L49">                return station; // Özel servise yönlendir</span>
+            }
+<span class="fc" id="L51">        }</span>
+
+        // 2. Özel istasyon yoksa, genel istasyonlardan ilk boş olanı bul
+<span class="fc" id="L54">        return allStations.stream()</span>
+<span class="fc bfc" id="L55" title="All 2 branches covered.">                .filter(s -&gt; s.getExclusiveBrand() == null) // Genel istasyon</span>
+<span class="fc" id="L56">                .findFirst()</span>
+<span class="fc" id="L57">                .orElseThrow(() -&gt; new RuntimeException(&quot;Streamde Uygun istasyon bulunamadı!&quot;));</span>
+    }
+
+    public List&lt;Appointment&gt; getAllAppointments() {
+<span class="fc" id="L61">        return appointmentRepository.findAll();</span>
+    }
+
+    public Appointment updateAppointmentStatus(Long id, String status) {
+<span class="fc" id="L65">        Appointment appointment = appointmentRepository.findById(id)</span>
+<span class="fc" id="L66">                .orElseThrow(() -&gt; new RuntimeException(&quot;Randevu bulunamadı!&quot;));</span>
+<span class="fc" id="L67">        appointment.setStatus(AppointmentStatus.valueOf(status));</span>
+<span class="fc" id="L68">        return appointmentRepository.save(appointment);</span>
+    }
+
+    public boolean deleteAppointment(Long id) {
+<span class="fc" id="L72">        appointmentRepository.findById(id)</span>
+<span class="fc" id="L73">                .orElseThrow(() -&gt; new RuntimeException(&quot;Randevu bulunamadı!&quot;));</span>
+<span class="fc" id="L74">        appointmentRepository.deleteById(id);</span>
+<span class="fc" id="L75">        return true;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

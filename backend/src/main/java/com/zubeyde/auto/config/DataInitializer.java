@@ -1,0 +1,186 @@
+package com.zubeyde.auto.config;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.zubeyde.auto.entity.Admin;
+import com.zubeyde.auto.entity.Appointment;
+import com.zubeyde.auto.entity.AppointmentStatus;
+import com.zubeyde.auto.entity.Brand;
+import com.zubeyde.auto.entity.ChecklistTemplate;
+import com.zubeyde.auto.entity.CriticalLevel;
+import com.zubeyde.auto.entity.Customer;
+import com.zubeyde.auto.entity.Station;
+import com.zubeyde.auto.entity.Vehicle;
+import com.zubeyde.auto.repository.AppointmentRepository;
+import com.zubeyde.auto.repository.AuthRepository;
+import com.zubeyde.auto.repository.BrandRepository;
+import com.zubeyde.auto.repository.ChecklistTemplateRepository;
+import com.zubeyde.auto.repository.CustomerRepository;
+import com.zubeyde.auto.repository.StationRepository;
+import com.zubeyde.auto.repository.VehicleRepository;
+
+@Configuration
+public class DataInitializer {
+
+    @Bean
+    CommandLineRunner initData(BrandRepository brandRepository, 
+                               StationRepository stationRepository, 
+                               ChecklistTemplateRepository checklistTemplateRepository, 
+                               AuthRepository authRepository,
+                               CustomerRepository customerRepository,
+                               VehicleRepository vehicleRepository,
+                               AppointmentRepository appointmentRepository) {
+        return args -> {
+            // 1. Init Brands
+            if (brandRepository.count() == 0) {
+                List<Brand> brands = Arrays.asList(
+                    new Brand(null, "Toyota", "Japan"),
+                    new Brand(null, "Volkswagen", "Germany"),
+                    new Brand(null, "Ford", "USA"),
+                    new Brand(null, "Honda", "Japan"),
+                    new Brand(null, "BMW", "Germany"),
+                    new Brand(null, "Mercedes-Benz", "Germany"),
+                    new Brand(null, "Hyundai", "South Korea"),
+                    new Brand(null, "Audi", "Germany"),
+                    new Brand(null, "Nissan", "Japan"),
+                    new Brand(null, "Chevrolet", "USA")
+                );
+                brandRepository.saveAll(brands);
+                System.out.println("Default brands initialized.");
+            }
+
+            // 2. Init Stations
+            if (stationRepository.count() == 0) {
+                // Fetch some brands for exclusive stations
+                Brand bmw = brandRepository.findByName("BMW").orElse(null);
+                Brand toyota = brandRepository.findByName("Toyota").orElse(null);
+                Brand mercedes = brandRepository.findByName("Mercedes-Benz").orElse(null);
+
+                List<Station> stations = Arrays.asList(
+                    // General Stations (No exclusive brand)
+                    createStation("ST-GEN-01", null, true, 5),
+                    createStation("ST-GEN-02", null, true, 5),
+                    createStation("ST-GEN-03", null, true, 5),
+                    createStation("ST-GEN-04", null, false, 3), // Closed one
+
+                    // Exclusive Stations
+                    createStation("ST-BMW-01", bmw, true, 3),
+                    createStation("ST-TOY-01", toyota, true, 4),
+                    createStation("ST-MER-01", mercedes, true, 3)
+                );
+                
+                stationRepository.saveAll(stations);
+                System.out.println("Default stations initialized.");
+            }
+
+            // 3. Init Checklist Templates
+            if (checklistTemplateRepository.count() == 0) {
+                ChecklistTemplate t1 = new ChecklistTemplate();
+                t1.setDescription("Fren Sistemi Kontrolü");
+                t1.setCategory("Fren");
+                t1.setLevel(CriticalLevel.AGIR_KUSUR);
+                t1.setVehicleType("Binek");
+                checklistTemplateRepository.save(t1);
+
+                ChecklistTemplate t2 = new ChecklistTemplate();
+                t2.setDescription("Lastik Diş Derinliği");
+                t2.setCategory("Lastik");
+                t2.setLevel(CriticalLevel.AGIR_KUSUR);
+                t2.setVehicleType("Binek");
+                checklistTemplateRepository.save(t2);
+
+                ChecklistTemplate t3 = new ChecklistTemplate();
+                t3.setDescription("Far Ayarları");
+                t3.setCategory("Aydınlatma");
+                t3.setLevel(CriticalLevel.HAFIF_KUSUR);
+                t3.setVehicleType("Binek");
+                checklistTemplateRepository.save(t3);
+
+                ChecklistTemplate t4 = new ChecklistTemplate();
+                t4.setDescription("Silecekler");
+                t4.setCategory("Görüş");
+                t4.setLevel(CriticalLevel.HAFIF_KUSUR);
+                t4.setVehicleType("Binek");
+                checklistTemplateRepository.save(t4);
+                
+                ChecklistTemplate t5 = new ChecklistTemplate();
+                t5.setDescription("Emniyet Kemeri");
+                t5.setCategory("Güvenlik");
+                t5.setLevel(CriticalLevel.AGIR_KUSUR);
+                t5.setVehicleType("Binek");
+                checklistTemplateRepository.save(t5);
+
+                System.out.println("Default checklist templates initialized.");
+            }
+
+            // 4. Init Users
+            if (authRepository.count() == 0) {
+                Admin secretary = new Admin();
+                secretary.setUsername("secretary");
+                secretary.setPassword("password");
+                secretary.setRole("SECRETARY");
+                authRepository.save(secretary);
+                
+                Admin zub = new Admin();
+                zub.setUsername("zub");
+                zub.setPassword("zub");
+                zub.setRole("INSPECTOR");
+                authRepository.save(zub);
+
+                Admin inspector = new Admin();
+                inspector.setUsername("inspector");
+                inspector.setPassword("password");
+                inspector.setRole("INSPECTOR");
+                authRepository.save(inspector);
+                
+                System.out.println("Default users initialized.");
+            }
+
+            // 5. Init Customer, Vehicle, Appointment
+            if (customerRepository.count() == 0) {
+                Customer customer = new Customer();
+                customer.setName("Ahmet Yılmaz");
+                customer.setPhone("5551234567");
+                customer.setEmail("ahmet@example.com");
+                customerRepository.save(customer);
+
+                Brand toyota = brandRepository.findByName("Toyota").orElse(null);
+                
+                Vehicle vehicle = new Vehicle();
+                vehicle.setPlateCode("34ABC123");
+                vehicle.setModelYear("2020");
+                vehicle.setChassisNumber("CH123456789");
+                vehicle.setVehicleType("Binek");
+                vehicle.setBrand(toyota);
+                vehicle.setCustomer(customer);
+                vehicleRepository.save(vehicle);
+
+                Station station = stationRepository.findAll().stream()
+                        .filter(s -> s.getExclusiveBrand() == null || s.getExclusiveBrand().getName().equals("Toyota"))
+                        .findFirst().orElse(null);
+
+                Appointment appointment = new Appointment();
+                appointment.setVehicle(vehicle);
+                appointment.setStation(station);
+                appointment.setStatus(AppointmentStatus.PENDING);
+                appointmentRepository.save(appointment);
+
+                System.out.println("Default customer, vehicle and appointment initialized.");
+            }
+        };
+    }
+
+    private Station createStation(String code, Brand brand, boolean isOpen, int capacity) {
+        Station s = new Station();
+        s.setStationCode(code);
+        s.setExclusiveBrand(brand);
+        s.setOpen(isOpen);
+        s.setCapacity(capacity);
+        return s;
+    }
+}

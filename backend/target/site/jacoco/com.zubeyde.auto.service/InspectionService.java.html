@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InspectionService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">auto</a> &gt; <a href="index.source.html" class="el_package">com.zubeyde.auto.service</a> &gt; <span class="el_source">InspectionService.java</span></div><h1>InspectionService.java</h1><pre class="source lang-java linenums">package com.zubeyde.auto.service;
+import com.zubeyde.auto.entity.*;
+import com.zubeyde.auto.exception.NullException;
+import com.zubeyde.auto.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+<span class="fc" id="L13">public class InspectionService {</span>
+
+    @Autowired
+    private InspectionRepository inspectionRepository;
+
+    @Autowired
+    private InspectionDetailRepository detailRepository;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
+    @Autowired
+    private NotificationService notificationService;
+
+
+    @Transactional
+    public Inspection completeInspection(Long inspectionId, List&lt;InspectionDetail&gt; details)  {
+<span class="fc" id="L29">        Inspection inspection = inspectionRepository.findById(inspectionId)</span>
+<span class="fc" id="L30">                .orElseThrow(() -&gt; new RuntimeException(&quot;Muayene bulunamadı: &quot; + inspectionId));</span>
+
+<span class="fc" id="L32">        boolean agirKusurVar = false;</span>
+<span class="fc" id="L33">        int hafifKusurSayisi = 0;</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">        if (details.isEmpty()){</span>
+<span class="fc" id="L35">            throw new NullException(&quot;İnceleme detayı boş&quot;);</span>
+        }
+
+<span class="fc bfc" id="L38" title="All 2 branches covered.">        for (InspectionDetail detail : details) {</span>
+
+<span class="fc" id="L40">            detail.setInspection(inspection);</span>
+<span class="fc" id="L41">            detailRepository.save(detail);</span>
+
+
+<span class="fc bfc" id="L44" title="All 2 branches covered.">            if (!detail.isPassed()) {</span>
+<span class="fc" id="L45">                ChecklistTemplate kural = detail.getCheckItem();</span>
+                
+<span class="fc bfc" id="L47" title="All 2 branches covered.">                if (kural != null) {</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">                    if (kural.getLevel() == CriticalLevel.AGIR_KUSUR) {</span>
+<span class="fc" id="L49">                        agirKusurVar = true;</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">                    } else if (kural.getLevel() == CriticalLevel.HAFIF_KUSUR) {</span>
+<span class="fc" id="L51">                        hafifKusurSayisi++;</span>
+                    }
+                }
+            }
+<span class="fc" id="L55">        }</span>
+
+        // KARAR MEKANİZMASI
+<span class="fc" id="L58">        String sonuc=&quot;KALDI&quot;;</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">        if (agirKusurVar) {</span>
+<span class="fc" id="L60">            sonuc = &quot;KALDI&quot;; // Tek bir ağır kusur bile bırakır</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">        } else if (hafifKusurSayisi &gt; 3) {</span>
+<span class="fc" id="L62">            sonuc = &quot;ŞARTLI GEÇTİ&quot;; // 3 Hafif kusur şartlı geçirir</span>
+        }else {
+<span class="fc" id="L64">            sonuc = &quot;GEÇTİ&quot;; // Temiz</span>
+        }
+
+<span class="fc" id="L67">        inspection.setResult(sonuc);</span>
+<span class="fc" id="L68">        inspection.setInspectionDate(LocalDateTime.now());</span>
+<span class="fc" id="L69">        notificationService.IncspectionCompletedNotification(inspection);</span>
+<span class="fc" id="L70">        return inspectionRepository.save(inspection);</span>
+    }
+
+    public Inspection createInspection(Inspection inspection) {
+<span class="fc bfc" id="L74" title="All 2 branches covered.">        if(appointmentRepository.findById(inspection.getAppointment().getId()).isEmpty()) {</span>
+<span class="fc" id="L75">            throw new RuntimeException(&quot;Randevu bulunamadı: &quot; + inspection.getAppointment().getId());</span>
+        }
+<span class="fc" id="L77">        return inspectionRepository.save(inspection);</span>
+    }
+
+    public Inspection updateInspection(Long id, Inspection inspection) {
+<span class="fc" id="L81">        Inspection existingInspection = inspectionRepository.findById(id)</span>
+<span class="fc" id="L82">                .orElseThrow(() -&gt; new RuntimeException(&quot;Muayene bulunamadı: &quot; + id));</span>
+
+<span class="fc" id="L84">        existingInspection.setResult(inspection.getResult());</span>
+<span class="fc" id="L85">        existingInspection.setNotes(inspection.getNotes());</span>
+<span class="fc" id="L86">        existingInspection.setInspectionDate(inspection.getInspectionDate());</span>
+
+<span class="fc" id="L88">        return inspectionRepository.save(existingInspection);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>
