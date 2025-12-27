@@ -3,6 +3,7 @@ package com.zubeyde.auto.BirimTest;
 import com.zubeyde.auto.entity.*;
 import com.zubeyde.auto.exception.NullException;
 import com.zubeyde.auto.repository.AppointmentRepository;
+import com.zubeyde.auto.repository.EmployeeRepository;
 import com.zubeyde.auto.repository.InspectionDetailRepository;
 import com.zubeyde.auto.repository.InspectionRepository;
 import com.zubeyde.auto.service.InspectionService;
@@ -30,7 +31,8 @@ public class InspectionServiceTest {
 
     @Mock
     private InspectionDetailRepository detailRepository;
-
+    @Mock
+    private EmployeeRepository employeeRepository;
     @Mock
     private AppointmentRepository appointmentRepository;
     @Mock

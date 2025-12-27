@@ -27,7 +27,8 @@ public class InspectionService {
     private NotificationService notificationService;
     @Autowired
     private ChecklistTemplateRepository checklistTemplateRepository;
-
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
     
     public Inspection completeInspection(Long inspectionId, List<InspectionDetail> details)  {
@@ -89,8 +90,6 @@ public class InspectionService {
         return inspectionRepository.save(inspection);
     }
 
-    @Autowired
-    private EmployeeRepository employeeRepository;
 
     public Inspection createInspection(Inspection inspection) {
         if(appointmentRepository.findById(inspection.getAppointment().getId()).isEmpty()) {

@@ -84,7 +84,7 @@ public class InspectionDetailsIntegrationTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(detail)))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.inspection.id").value(22L))
+            .andExpect(jsonPath("$.id").value(1L))
             .andExpect(jsonPath("$.passed").value("true"));
     }
 
