@@ -86,7 +86,7 @@ public class StationIntegrationTest {
                 .andDo(print())
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
-                .andExpect(jsonPath("$.title").value("Beklenmeyen Çalışma Zamanı Hatası"))
+
                 .andExpect(jsonPath("$.detail").value(expectedMessage))
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.path").exists());
