@@ -197,6 +197,33 @@ public class DataInitializer {
                 appointment2.setStatus(AppointmentStatus.PENDING);
                 appointmentRepository.save(appointment2);
 
+                Customer customer3 = new Customer();
+                customer3.setName("Ali Veli");
+                customer3.setPhone("5551234369");
+                customer3.setEmail("ali@example.com");
+                customerRepository.save(customer3);
+
+                Brand bmw = brandRepository.findByName("BMW").orElse(null);
+                
+                Vehicle veh = new Vehicle();
+                veh.setPlateCode("04ABC123");
+                veh.setModelYear("2020");
+                veh.setChassisNumber("CH123456789");
+                veh.setVehicleType("Binek");
+                veh.setBrand(bmw);
+                veh.setCustomer(customer3);
+                vehicleRepository.save(veh);
+
+                Station station3 = stationRepository.findAll().stream()
+                        .filter(s -> s.getExclusiveBrand() == null || s.getExclusiveBrand().getName().equals("Toyota"))
+                        .findFirst().orElse(null);
+
+                Appointment appointment3 = new Appointment();
+                appointment3.setVehicle(veh);
+                appointment3.setStation(station3);
+                appointment3.setStatus(AppointmentStatus.PENDING);
+                appointmentRepository.save(appointment3);
+
                 System.out.println("Default customer, vehicle and appointment initialized.");
             }
         };

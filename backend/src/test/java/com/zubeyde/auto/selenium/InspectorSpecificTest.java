@@ -22,7 +22,7 @@ public class InspectorSpecificTest {
     private WebDriverWait wait;
     
     // Hedef Plaka
-    private final String targetPlate = "01ABC123";
+    private final String targetPlate = "34ABC123";
 
     @BeforeEach
     public void setUp() {

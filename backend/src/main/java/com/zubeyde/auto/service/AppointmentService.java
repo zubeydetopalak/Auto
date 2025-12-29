@@ -34,6 +34,9 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.PENDING);
         appointment.setStation(targetStation);
         appointment.setVehicle(vehicle);
+        int kapasite = targetStation.getCapacity();
+        targetStation.setCapacity(kapasite - 1);
+        stationRepository.save(targetStation);
         return appointmentRepository.save(appointment);
     }
 
@@ -62,9 +65,16 @@ public class AppointmentService {
     }
 
     public Appointment updateAppointmentStatus(Long id, String status) {
+        
         Appointment appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Randevu bulunamadı!"));
         appointment.setStatus(AppointmentStatus.valueOf(status));
+        if (appointment.getStatus() == AppointmentStatus.COMPLETED|| appointment.getStatus() == AppointmentStatus.CANCELLED) {
+            int guncelKapasite= appointment.getStation().getCapacity();
+            Station neWstation = appointment.getStation();
+            neWstation.setCapacity(guncelKapasite+1);
+            stationRepository.save(neWstation);
+        }
         return appointmentRepository.save(appointment);
     }
 

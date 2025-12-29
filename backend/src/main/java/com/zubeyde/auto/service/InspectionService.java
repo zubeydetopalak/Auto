@@ -81,9 +81,10 @@ public class InspectionService {
         inspection.setInspectionDate(LocalDateTime.now());
         
         if (inspection.getAppointment() != null) {
-            Appointment appointment = inspection.getAppointment();
-            appointment.setStatus(AppointmentStatus.COMPLETED);
-            appointmentRepository.save(appointment);
+             Appointment appointment = inspection.getAppointment();
+                appointment.setStatus(AppointmentStatus.COMPLETED);
+                appointmentRepository.save(appointment);
+        
         }
 
         notificationService.IncspectionCompletedNotification(inspection);
