@@ -21,8 +21,8 @@ public class StationCapacityTest {
     private WebDriverWait wait;
 
     // --- TEST VERİLERİ ---
-    private final String targetPlate = "34 ZUB 4804";           
-    private final String targetStation = "ST-TOY-01"; 
+    private final String targetPlate = "99ZZZ123";
+    private final String targetStation = "ST-GEN-01";
 
     @BeforeEach
     public void setUp() {

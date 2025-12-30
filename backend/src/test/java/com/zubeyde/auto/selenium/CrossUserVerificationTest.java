@@ -49,7 +49,7 @@ public class CrossUserVerificationTest {
         int randNum = rand.nextInt(9000) + 1000;
         
         this.randomPhone = "555" + randNum; 
-        this.targetPlate = "34 ZUB " + randNum;
+        this.targetPlate = "34 LEV " + randNum;
         this.customerName = "Musteri" + randNum;
         
         System.out.println("TEST SENARYOSU VERİLERİ:");

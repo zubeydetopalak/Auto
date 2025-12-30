@@ -224,6 +224,61 @@ public class DataInitializer {
                 appointment3.setStatus(AppointmentStatus.PENDING);
                 appointmentRepository.save(appointment3);
 
+                Customer cus = new Customer();
+                cus.setName("Zeynep Yılmaz");
+                cus.setPhone("5551934567");
+                cus.setEmail("zeynep@example.com");
+                customerRepository.save(cus);
+
+                Brand chev = brandRepository.findByName("Chevrolet").orElse(null);
+                
+                Vehicle vehcus = new Vehicle();
+                vehcus.setPlateCode("90ABC123");
+                vehcus.setModelYear("2000");
+                vehcus.setChassisNumber("CH123496789");
+                vehcus.setVehicleType("Kamyonetnet");
+                vehcus.setBrand(chev);
+                vehcus.setCustomer(cus);
+                vehicleRepository.save(vehcus);
+
+                Station stationCus = stationRepository.findAll().stream()
+                        .filter(s -> s.getExclusiveBrand() == null || s.getExclusiveBrand().getName().equals("Toyota"))
+                        .findFirst().orElse(null);
+
+                Appointment appointment5 = new Appointment();
+                appointment5.setVehicle(vehcus);
+                appointment5.setStation(stationCus);
+                appointment5.setStatus(AppointmentStatus.PENDING);
+                appointmentRepository.save(appointment5);
+
+                Customer customer1 = new Customer();
+                customer1.setName("Zübeyde Topalak");
+                customer1.setPhone("5051934567");
+                customer1.setEmail("zubu@example.com");
+                customerRepository.save(customer1);
+
+                Brand branma = brandRepository.findByName("Toyota").orElse(null);
+
+                Vehicle vehicle1 = new Vehicle();
+                vehicle1.setPlateCode("99ZZZ123");
+                vehicle1.setModelYear("2000");
+                vehicle1.setChassisNumber("CH123496789");
+                vehicle1.setVehicleType("Binek");
+                vehicle1.setBrand(branma);
+                vehicle1.setCustomer(customer1);
+                vehicleRepository.save(vehicle1);
+
+                Station station1 = stationRepository.findAll().stream()
+                        .filter(s -> s.getExclusiveBrand() == null || s.getExclusiveBrand().getName().equals("Toyota"))
+                        .findFirst().orElse(null);
+
+                Appointment appointment6 = new Appointment();
+                appointment6.setVehicle(vehicle1);
+                appointment6.setStation(station1);
+                appointment6.setStatus(AppointmentStatus.PENDING);
+                appointmentRepository.save(appointment6);
+
+
                 System.out.println("Default customer, vehicle and appointment initialized.");
             }
         };
